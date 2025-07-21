@@ -10,8 +10,9 @@ import {
   Alert,
   capitalize,
 } from "@mui/material";
- 
-const API_KEY = "b04d419ea968b89c22d0595db2a24be2"; 
+
+const API_KEY = "b04d419ea968b89c22d0595db2a24be2";
+
 function App() {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState(null);
@@ -21,13 +22,14 @@ function App() {
     const saved = localStorage.getItem("recentSearches");
     return saved ? JSON.parse(saved) : [];
   });
-  
+
+  // Fetch weather data for the given city
   const getWeather = async () => {
     if (!city) return;
     setLoading(true);
     setError("");
     setWeather(null);
- 
+
     try {
       const res = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
@@ -43,56 +45,53 @@ function App() {
       setLoading(false);
       setCity("");
     }
+
+    // Update recent searches and save to localStorage
     setRecentSearches((prev) => {
       let updated = [city, ...prev.filter((c) => c.toLowerCase() !== city.toLowerCase())];
-    
+
       if (updated.length > 5) {
-        updated = updated.slice(0, 5); // limit to 5 using if
+        updated = updated.slice(0, 5);
       }
-    
+
       localStorage.setItem("recentSearches", JSON.stringify(updated));
       return updated;
     });
+
   };
   
-  const clearWeather = () =>{
+  
+  // Clear weather data and recent searches
+  const clearWeather = () => {
     setWeather(null);
-    setCity('');
+    setCity("");
     setRecentSearches([]);
     localStorage.removeItem("recentSearches");
   };
-  
-  
-  const getLocalTime = (dt, timezone) => {
-    const localDate = new Date((dt + timezone) * 1000);
-    return localDate.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-  };
+
   return (
     <Container maxWidth="sm" sx={{ mt: 5, textAlign: "center" }}>
       <Typography variant="h4" gutterBottom>
         🌤 Weather App
       </Typography>
-      <Container sx={{ gap: 2, display:"flex", flexDirection:"row", height:"55px" }}>
-      <TextField
-        label="Enter city"
-        variant="outlined"
-        fullWidth
-        value={city}
-        onChange={(e) => setCity(e.target.value)}
-        sx={{ mb: 2 }}
-      />
-      <Button variant="contained" fullWidth onClick={getWeather}>
-        Get Weather
-      </Button>
-      <Button variant="" fullWidth onClick={clearWeather}>
-        Clear
-      </Button>
 
+      <Container sx={{ gap: 2, display: "flex", flexDirection: "row", height: "55px" }}>
+        <TextField
+          label="Enter city"
+          variant="outlined"
+          fullWidth
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+        <Button variant="contained" fullWidth onClick={getWeather}>
+          Get Weather
+        </Button>
+        <Button variant="" fullWidth onClick={clearWeather}>
+          Clear
+        </Button>
       </Container>
+
       {recentSearches.length > 0 && (
         <Card sx={{ mt: 4, p: 2 }}>
           <Typography variant="subtitle1">Recent Searches:</Typography>
@@ -117,7 +116,7 @@ function App() {
           {error}
         </Alert>
       )}
-      
+
       {weather && (
         <Card sx={{ mt: 2 }}>
           <CardContent>
@@ -136,14 +135,15 @@ function App() {
             <Typography variant="body2">
               Wind: {weather.wind.speed} m/s
             </Typography>
-            <Typography variant="body2">
-              Local Time: {getLocalTime(weather.dt, weather.timezone)}
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              Local Time: {new Date(weather.dt * 1000).toLocaleTimeString()}
             </Typography>
+
           </CardContent>
         </Card>
       )}
-    </Container>  
-    );
-  }
+    </Container>
+  );
+}
 
 export default App;
